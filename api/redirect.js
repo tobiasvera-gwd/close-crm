@@ -2,7 +2,7 @@
 export default async function handler(req, res) {
     try {
         // Obtener parámetros de la URL
-        const { contact_id, email, name, company, function: enrichFunction } = req.query;
+        const { contact_id, email, name, company, company_url, function: enrichFunction } = req.query;
         
         // URL de Make webhook
         const MAKE_WEBHOOK_URL = 'https://hook.eu2.make.com/ihs69ldf5vmx7nl2e3y1gqxjqlgldxbt';
@@ -18,6 +18,7 @@ export default async function handler(req, res) {
                 email: email || '',
                 name: name || '',
                 company: company || '',
+                company_url: company_url || '',
                 function: enrichFunction || 'phone'
             })
         });
