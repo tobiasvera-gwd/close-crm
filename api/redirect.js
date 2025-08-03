@@ -24,19 +24,19 @@ export default async function handler(req, res) {
         });
         
         if (!response.ok) {
-            throw new Error(`Make webhook failed: ${response.statusText}`);
+            throw new Error(`Make webhook fehlgeschlagen: ${response.statusText}`);
         }
         
         // Respuesta al usuario
         res.status(200).json({
             success: true,
-            message: 'Enviado a Clay para enriquecimiento',
+            message: 'An Clay zur Anreicherung gesendet',
             contact_id: contact_id,
             email: email
         });
         
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Fehler:', error);
         res.status(500).json({
             success: false,
             error: error.message
