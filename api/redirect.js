@@ -5,7 +5,7 @@ export default async function handler(req, res) {
         const { contact_id, email, name, company, lead_url, linkedin, function: enrichFunction } = req.query;
         
         // URL de Make webhook
-        const MAKE_WEBHOOK_URL = 'https://hook.eu2.make.com/ihs69ldf5vmx7nl2e3y1gqxjqlgldxbt';
+        const MAKE_WEBHOOK_URL = 'https://hook.eu2.make.com/w6p2uxzc6mpmpl88wx9bwzislvrl1ffg';
         
         // Enviar POST a Make con los datos
         const response = await fetch(MAKE_WEBHOOK_URL, {
