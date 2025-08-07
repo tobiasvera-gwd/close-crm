@@ -7,7 +7,7 @@ export default async function handler(req, res) {
         // URL de Make webhook
         const MAKE_WEBHOOK_URL = 'https://hook.eu2.make.com/w6p2uxzc6mpmpl88wx9bwzislvrl1ffg';
         
-        // Enviar POST a Make con los datos
+        // Enviar a Make webhook
         const response = await fetch(MAKE_WEBHOOK_URL, {
             method: 'POST',
             headers: {
@@ -27,22 +27,13 @@ export default async function handler(req, res) {
         }
         
         // Respuesta al usuario
-        res.status(200).send(`
-        <!DOCTYPE html>
-        <html>
-            <head>
-                <title>Enviado</title>
-                <style>body{font-family:Arial;text-align:center;padding:50px;background:#f0f0f0;}</style>
-            </head>
-            <body>
-                <h2>✅ An Clay zur Anreicherung gesendet</h2>
-                <p><strong>${name}</strong></p>
-                <p>${company}</p>
-                <p>Diese Registerkarte wird in 1 Sekunde geschlossen...</p>
-                <script>setTimeout(() => window.close(), 1000);</script>
-            </body>
-        </html>
-        `);
+        res.status(200).json({
+            success: true,
+            message: 'An Make gesendet',
+            contact_id: contact_id,
+            name: name,
+            company: company
+        });
         
     } catch (error) {
         console.error('Fehler:', error);
