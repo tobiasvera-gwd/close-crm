@@ -27,12 +27,22 @@ export default async function handler(req, res) {
         }
         
         // Respuesta al usuario
-        res.status(200).json({
-            success: true,
-            message: 'An Clay zur Anreicherung gesendet',
-            contact_id: contact_id,
-            company: company
-        });
+        res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <title>Enviado</title>
+                <style>body{font-family:Arial;text-align:center;padding:50px;background:#f0f0f0;}</style>
+            </head>
+            <body>
+                <h2>✅ An Clay zur Anreicherung gesendet</h2>
+                <p><strong>${name}</strong></p>
+                <p>${company}</p>
+                <p>Diese Registerkarte wird in 1 Sekunde geschlossen...</p>
+                <script>setTimeout(() => window.close(), 1000);</script>
+            </body>
+        </html>
+        `);
         
     } catch (error) {
         console.error('Fehler:', error);
