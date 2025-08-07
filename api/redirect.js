@@ -31,7 +31,7 @@ export default async function handler(req, res) {
             success: true,
             message: 'An Clay zur Anreicherung gesendet',
             contact_id: contact_id,
-            email: email
+            company: company
         });
         
     } catch (error) {
