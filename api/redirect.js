@@ -2,7 +2,7 @@
 export default async function handler(req, res) {
     try {
         // Obtener parámetros de la URL
-        const { contact_id, email, name, company, lead_url, linkedin, function: enrichFunction } = req.query;
+        const { contact_id, lead_id, name, company, domain } = req.query;
         
         // URL de Make webhook
         const MAKE_WEBHOOK_URL = 'https://hook.eu2.make.com/w6p2uxzc6mpmpl88wx9bwzislvrl1ffg';
@@ -15,12 +15,10 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
                 contact_id: contact_id || '',
-                email: email || '',
+                lead_id: lead_id || '',
                 name: name || '',
                 company: company || '',
-                lead_url: lead_url || '',
-                linkedin: linkedin || '',
-                function: enrichFunction || 'phone'
+                domain: domain || ''
             })
         });
         
