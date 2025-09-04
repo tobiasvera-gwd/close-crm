@@ -169,6 +169,17 @@ export default function handler(req, res) {
                 </div>
             </div>
             
+            <!-- DEBUG: Todos los dominios posibles -->
+            <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; font-family: monospace; font-size: 12px;">
+                <strong>DEBUG - Domain testing:</strong><br>
+                domain (custom.Domain): "${domain}"<br>
+                domain2 (url): "${domain2}"<br>
+                domain3 (custom.domain): "${domain3}"<br>
+                domain4 (website): "${domain4}"<br>
+                <br>
+                All query params: ${Object.keys(req.query).join(', ')}
+            </div>
+            
             <button class="continue-button" onclick="goToForm()">
                 🚀 Go to Contract Form
             </button>
@@ -196,6 +207,7 @@ export default function handler(req, res) {
                 ${zipcode ? `params.push('prefill_ZIP+Code=' + encodeURIComponent('${zipcode}'));` : ''}
                 ${country ? `params.push('prefill_Country=' + encodeURIComponent('${country}'));` : ''}
                 ${domain ? `params.push('prefill_Client+Domain=' + encodeURIComponent('${domain}'));` : ''}
+                ${linkedin ? `params.push('prefill_Client+LinkedIn=' + encodeURIComponent('${linkedin}'));` : ''}
                 
                 // Status automático
                 params.push('prefill_Status=Contract+Send');
