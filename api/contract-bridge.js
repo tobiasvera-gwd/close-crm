@@ -15,8 +15,6 @@ export default function handler(req, res) {
       linkedin
     } = req.query;
 
-    console.log('Received data:', req.query);
-
     // Si no hay nombre del cliente, mostrar error
     if (!lead_name) {
       return res.status(400).setHeader('Content-Type', 'text/html').send(`
@@ -154,38 +152,21 @@ export default function handler(req, res) {
                     <div class="detail-value">Contract Creation</div>
                 </div>
                 <div class="detail-item">
-                    <div class="detail-label">Contact Email</div>
-                    <div class="detail-value ${!contact_email ? 'missing-data' : ''}">${contact_email || 'Missing'}</div>
-                </div>
-                <div class="detail-item">
                     <div class="detail-label">Address</div>
-                    <div class="detail-value ${!address_1 ? 'missing-data' : ''}">${address_1 || 'Missing'}</div>
+                    <div class="detail-value">${address_1 || 'Not provided'}</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">City</div>
-                    <div class="detail-value ${!city ? 'missing-data' : ''}">${city || 'Missing'}</div>
+                    <div class="detail-value">${city || 'Not provided'}</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">ZIP Code</div>
-                    <div class="detail-value ${!zipcode ? 'missing-data' : ''}">${zipcode || 'Missing'}</div>
+                    <div class="detail-value">${zipcode || 'Not provided'}</div>
                 </div>
-            </div>
-            
-            <!-- DEBUG: Show all received parameters -->
-            <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; font-family: monospace; font-size: 12px;">
-                <strong>DEBUG - Received Parameters:</strong><br>
-                lead_name: ${lead_name || 'undefined'}<br>
-                lead_id: ${lead_id || 'undefined'}<br>
-                contact_email: ${contact_email || 'undefined'}<br>
-                contact_name: ${contact_name || 'undefined'}<br>
-                address_1: ${address_1 || 'undefined'}<br>
-                city: ${city || 'undefined'}<br>
-                zipcode: ${zipcode || 'undefined'}<br>
-                country: ${country || 'undefined'}<br>
-                domain: ${domain || 'undefined'}<br>
-                <br>
-                <strong>All URL params:</strong><br>
-                ${JSON.stringify(req.query, null, 2)}
+                <div class="detail-item">
+                    <div class="detail-label">Country</div>
+                    <div class="detail-value">${country || 'Not provided'}</div>
+                </div>
             </div>
             
             <button class="continue-button" onclick="goToForm()">
@@ -200,21 +181,17 @@ export default function handler(req, res) {
 
         <script>
             function goToForm() {
-                // Crear URL del formulario de Airtable con todos los datos
+                // Crear URL del formulario de Airtable con todos los datos disponibles
                 const airtableFormUrl = 'https://airtable.com/appxCc96K5ulNjpcL/pagVjxOWAS0rICA5j/form';
                 let formUrl = airtableFormUrl + '?prefill_Client+Name=' + encodeURIComponent('${lead_name}');
                 
-                // Agregar otros campos si existen
-                ${contact_email ? `formUrl += '&prefill_Contact+Email=' + encodeURIComponent('${contact_email}');` : ''}
-                ${contact_name ? `formUrl += '&prefill_Contact+Name=' + encodeURIComponent('${contact_name}');` : ''}
+                // Agregar campos disponibles de CloseCRM
                 ${address_1 ? `formUrl += '&prefill_Address=' + encodeURIComponent('${address_1}');` : ''}
                 ${city ? `formUrl += '&prefill_City=' + encodeURIComponent('${city}');` : ''}
                 ${zipcode ? `formUrl += '&prefill_ZIP+Code=' + encodeURIComponent('${zipcode}');` : ''}
                 ${country ? `formUrl += '&prefill_Country=' + encodeURIComponent('${country}');` : ''}
                 ${lead_id ? `formUrl += '&prefill_Close+Lead+ID=' + encodeURIComponent('${lead_id}');` : ''}
                 ${domain ? `formUrl += '&prefill_Domain=' + encodeURIComponent('${domain}');` : ''}
-                ${notes ? `formUrl += '&prefill_Notes=' + encodeURIComponent('${notes}');` : ''}
-                ${linkedin ? `formUrl += '&prefill_LinkedIn=' + encodeURIComponent('${linkedin}');` : ''}
                 
                 window.open(formUrl, '_blank');
             }
@@ -232,7 +209,7 @@ export default function handler(req, res) {
       <html>
       <body style="font-family: Arial; padding: 50px; text-align: center; background: #ffebee;">
         <h1>❌ Server Error</h1>
-        <p>Error: ${error.message}</p>
+        <p>Something went wrong. Please try again.</p>
         <button onclick="window.close()">Close</button>
       </body>
       </html>
