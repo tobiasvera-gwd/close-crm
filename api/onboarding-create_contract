@@ -1,0 +1,30 @@
+// pages/api/create-contract.js
+export default async function handler(req, res) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
+
+  try {
+    // Obtener datos de CloseCRM
+    const {
+      lead_name,
+      lead_id
+    } = req.query;
+
+    // Validación básica
+    if (!lead_name) {
+      // Redirigir a página de error
+      return res.redirect('/error?message=' + encodeURIComponent('Falta el nombre del cliente en CloseCRM'));
+    }
+
+    // Si todo está bien, redirigir al formulario de Airtable con datos precargados
+    const airtableFormUrl = 'https://airtable.com/appxCc96K5ulNjpcL/pagVjxOWAS0rICA5j/form';
+    const redirectUrl = `${airtableFormUrl}?prefill_Client+Name=${encodeURIComponent(lead_name)}`;
+
+    res.redirect(redirectUrl);
+
+  } catch (error) {
+    console.error('Error:', error);
+    res.redirect('/error?message=' + encodeURIComponent('Error interno del sistema'));
+  }
+}
