@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+</head>
+<body>
+    <h1>FUNCIONA!</h1>
+    <p id="client-name">No client</p>
+    
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const leadName = params.get('lead_name');
+        if (leadName) {
+            document.getElementById('client-name').textContent = 'Cliente: ' + leadName;
+        }
+    </script>
+</body>
+</html>
