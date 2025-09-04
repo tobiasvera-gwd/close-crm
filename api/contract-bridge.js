@@ -4,15 +4,12 @@ export default function handler(req, res) {
     const {
       lead_name,
       lead_id,
-      contact_email,
-      contact_name,
       address_1,
       city,
       zipcode,
       country,
       domain,
-      notes,
-      linkedin
+      contact_email
     } = req.query;
 
     // Si no hay nombre del cliente, mostrar error
@@ -104,10 +101,6 @@ export default function handler(req, res) {
                 color: #333;
                 font-size: 1.1rem;
             }
-            .missing-data {
-                color: #ff6b6b;
-                font-style: italic;
-            }
             .continue-button {
                 background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
                 color: white;
@@ -152,32 +145,21 @@ export default function handler(req, res) {
                     <div class="detail-value">Contract Creation</div>
                 </div>
                 <div class="detail-item">
+                    <div class="detail-label">Domain</div>
+                    <div class="detail-value">${domain || 'Not provided'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value">${contact_email || 'Not provided'}</div>
+                </div>
+                <div class="detail-item">
                     <div class="detail-label">Address</div>
                     <div class="detail-value">${address_1 || 'Not provided'}</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">City</div>
-                    <div class="detail-value">${city || 'Not provided'}</div>
+                    <div class="detail-value">${city || 'Not provided'}, ${zipcode || ''} ${country || ''}</div>
                 </div>
-                <div class="detail-item">
-                    <div class="detail-label">ZIP Code</div>
-                    <div class="detail-value">${zipcode || 'Not provided'}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Country</div>
-                    <div class="detail-value">${country || 'Not provided'}</div>
-                </div>
-            </div>
-            
-            <!-- DEBUG: Todos los dominios posibles -->
-            <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; font-family: monospace; font-size: 12px;">
-                <strong>DEBUG - Domain testing:</strong><br>
-                domain (custom.Domain): "${domain}"<br>
-                domain2 (url): "${domain2}"<br>
-                domain3 (custom.domain): "${domain3}"<br>
-                domain4 (website): "${domain4}"<br>
-                <br>
-                All query params: ${Object.keys(req.query).join(', ')}
             </div>
             
             <button class="continue-button" onclick="goToForm()">
@@ -192,35 +174,29 @@ export default function handler(req, res) {
 
         <script>
             function goToForm() {
-                // URL del formulario de Airtable
                 const airtableFormUrl = 'https://airtable.com/appxCc96K5ulNjpcL/pagVjxOWAS0rICA5j/form';
-                let formUrl = airtableFormUrl + '?';
-                
-                // Datos de CloseCRM para precargar
-                const params = [];
+                const params = new URLSearchParams();
                 
                 // Client Information
-                params.push('prefill_Client+Name=' + encodeURIComponent('${lead_name}'));
-                params.push('prefill_Legal+Company+Name=' + encodeURIComponent('${lead_name}'));
-                ${address_1 ? `params.push('prefill_Address=' + encodeURIComponent('${address_1}'));` : ''}
-                ${city ? `params.push('prefill_City=' + encodeURIComponent('${city}'));` : ''}
-                ${zipcode ? `params.push('prefill_ZIP+Code=' + encodeURIComponent('${zipcode}'));` : ''}
-                ${country ? `params.push('prefill_Country=' + encodeURIComponent('${country}'));` : ''}
-                ${domain ? `params.push('prefill_Client+Domain=' + encodeURIComponent('${domain}'));` : ''}
-                ${linkedin ? `params.push('prefill_Client+LinkedIn=' + encodeURIComponent('${linkedin}'));` : ''}
+                params.append('prefill_Client Name', '${lead_name}');
+                params.append('prefill_Legal Company Name', '${lead_name}');
+                ${address_1 ? `params.append('prefill_Address', '${address_1.replace(/'/g, "\\'")}');` : ''}
+                ${city ? `params.append('prefill_City', '${city}');` : ''}
+                ${zipcode ? `params.append('prefill_ZIP Code', '${zipcode}');` : ''}
+                ${country ? `params.append('prefill_Country', '${country}');` : ''}
+                ${domain ? `params.append('prefill_Client Domain', '${domain}');` : ''}
+                ${contact_email ? `params.append('prefill_Contact Email', '${contact_email}');` : ''}
                 
                 // Status automático
-                params.push('prefill_Status=Contract+Send');
-                params.push('prefill_Proposal+Status=In+Progress');
+                params.append('prefill_Status', 'Contract Send');
+                params.append('prefill_Proposal Status', 'In Progress');
                 
                 // Complementary Data
-                ${lead_id ? `params.push('prefill_Close+Lead+ID=' + encodeURIComponent('${lead_id}'));` : ''}
+                ${lead_id ? `params.append('prefill_Close Lead ID', '${lead_id}');` : ''}
                 
-                // Construir URL final
-                formUrl += params.join('&');
-                
-                console.log('Opening form with URL:', formUrl);
-                window.open(formUrl, '_blank');
+                const finalUrl = airtableFormUrl + '?' + params.toString();
+                console.log('Opening form:', finalUrl);
+                window.open(finalUrl, '_blank');
             }
         </script>
     </body>
@@ -231,7 +207,7 @@ export default function handler(req, res) {
     res.status(200).send(html);
 
   } catch (error) {
-    console.error('Error in contract-bridge:', error);
+    console.error('Error:', error);
     res.status(500).setHeader('Content-Type', 'text/html').send(`
       <html>
       <body style="font-family: Arial; padding: 50px; text-align: center; background: #ffebee;">
