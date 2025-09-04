@@ -181,18 +181,33 @@ export default function handler(req, res) {
 
         <script>
             function goToForm() {
-                // Crear URL del formulario de Airtable con todos los datos disponibles
+                // URL del formulario de Airtable
                 const airtableFormUrl = 'https://airtable.com/appxCc96K5ulNjpcL/pagVjxOWAS0rICA5j/form';
-                let formUrl = airtableFormUrl + '?prefill_Client+Name=' + encodeURIComponent('${lead_name}');
+                let formUrl = airtableFormUrl + '?';
                 
-                // Agregar campos disponibles de CloseCRM
-                ${address_1 ? `formUrl += '&prefill_Address=' + encodeURIComponent('${address_1}');` : ''}
-                ${city ? `formUrl += '&prefill_City=' + encodeURIComponent('${city}');` : ''}
-                ${zipcode ? `formUrl += '&prefill_ZIP+Code=' + encodeURIComponent('${zipcode}');` : ''}
-                ${country ? `formUrl += '&prefill_Country=' + encodeURIComponent('${country}');` : ''}
-                ${lead_id ? `formUrl += '&prefill_Close+Lead+ID=' + encodeURIComponent('${lead_id}');` : ''}
-                ${domain ? `formUrl += '&prefill_Domain=' + encodeURIComponent('${domain}');` : ''}
+                // Datos de CloseCRM para precargar
+                const params = [];
                 
+                // Client Information
+                params.push('prefill_Client+Name=' + encodeURIComponent('${lead_name}'));
+                params.push('prefill_Legal+Company+Name=' + encodeURIComponent('${lead_name}'));
+                ${address_1 ? `params.push('prefill_Address=' + encodeURIComponent('${address_1}'));` : ''}
+                ${city ? `params.push('prefill_City=' + encodeURIComponent('${city}'));` : ''}
+                ${zipcode ? `params.push('prefill_ZIP+Code=' + encodeURIComponent('${zipcode}'));` : ''}
+                ${country ? `params.push('prefill_Country=' + encodeURIComponent('${country}'));` : ''}
+                ${domain ? `params.push('prefill_Client+Domain=' + encodeURIComponent('${domain}'));` : ''}
+                
+                // Status automático
+                params.push('prefill_Status=Contract+Send');
+                params.push('prefill_Proposal+Status=In+Progress');
+                
+                // Complementary Data
+                ${lead_id ? `params.push('prefill_Close+Lead+ID=' + encodeURIComponent('${lead_id}'));` : ''}
+                
+                // Construir URL final
+                formUrl += params.join('&');
+                
+                console.log('Opening form with URL:', formUrl);
                 window.open(formUrl, '_blank');
             }
         </script>
