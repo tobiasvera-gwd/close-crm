@@ -171,6 +171,23 @@ export default function handler(req, res) {
                 </div>
             </div>
             
+            <!-- DEBUG: Show all received parameters -->
+            <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; font-family: monospace; font-size: 12px;">
+                <strong>DEBUG - Received Parameters:</strong><br>
+                lead_name: ${lead_name || 'undefined'}<br>
+                lead_id: ${lead_id || 'undefined'}<br>
+                contact_email: ${contact_email || 'undefined'}<br>
+                contact_name: ${contact_name || 'undefined'}<br>
+                address_1: ${address_1 || 'undefined'}<br>
+                city: ${city || 'undefined'}<br>
+                zipcode: ${zipcode || 'undefined'}<br>
+                country: ${country || 'undefined'}<br>
+                domain: ${domain || 'undefined'}<br>
+                <br>
+                <strong>All URL params:</strong><br>
+                ${JSON.stringify(req.query, null, 2)}
+            </div>
+            
             <button class="continue-button" onclick="goToForm()">
                 🚀 Go to Contract Form
             </button>
