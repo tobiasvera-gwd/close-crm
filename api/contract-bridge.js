@@ -23,7 +23,7 @@ function cleanDomain(url) {
     return domain;
   } catch (error) {
     console.log('Error cleaning domain:', error);
-    return url; // Return original if cleaning fails
+    return url;
   }
 }
 
@@ -59,20 +59,13 @@ export default async function handler(req, res) {
               zipcode: closeData.addresses?.[0]?.zipcode || '',
               country: closeData.addresses?.[0]?.country || '',
               state: closeData.addresses?.[0]?.state || '',
-              // Intentar obtener el dominio de diferentes campos custom posibles
-              domain: closeData.custom?.Domain || 
-                      closeData.custom?.['cf_WjkAENp7Wl3eNRgU7fIabqURJs1oA9Eg6NmzJNaZo7F'] || 
-                      closeData.url || ''
+              // Usar la URL del lead y limpiarla
+              domain: cleanDomain(closeData.url || '')
             };
             
-            console.log('Lead data successfully fetched from CloseCRM:', {
-              name: leadData.name,
-              hasAddress: !!leadData.address_1,
-              hasCity: !!leadData.city,
-              hasDomain: !!leadData.domain
-            });
+            console.log('Lead data successfully fetched from CloseCRM');
           } else {
-            console.log('CloseCRM API response error:', closeResponse.status, closeResponse.statusText);
+            console.log('CloseCRM API response error:', closeResponse.status);
           }
         }
       } catch (error) {
@@ -87,7 +80,6 @@ export default async function handler(req, res) {
       city: leadData.city || '',
       zipcode: leadData.zipcode || '',
       country: leadData.country || '',
-      state: leadData.state || '',
       domain: leadData.domain || ''
     };
     
@@ -131,22 +123,13 @@ export default async function handler(req, res) {
     // Construir URL final
     const finalUrl = airtableFormUrl + '?' + params.toString();
     
-    // Log para debugging
-    console.log('Redirecting to Airtable form with data:', {
-      hasName: !!finalData.name,
-      hasAddress: !!finalData.address_1,
-      hasCity: !!finalData.city,
-      hasLeadId: !!lead_id,
-      paramCount: params.toString().split('&').length
-    });
-    
     // Redirección directa al formulario
     res.redirect(302, finalUrl);
     
   } catch (error) {
     console.error('Unexpected error in contract bridge:', error);
     
-    // Fallback completo: redirigir al formulario con datos mínimos disponibles
+    // Fallback: redirigir al formulario con datos mínimos disponibles
     try {
       const fallbackParams = new URLSearchParams();
       fallbackParams.append('prefill_Status', 'Contract Sent');
@@ -160,13 +143,9 @@ export default async function handler(req, res) {
       }
       
       const fallbackUrl = `https://airtable.com/appxCc96K5ulNjpcL/pagVjxOWAS0rICA5j/form?${fallbackParams.toString()}`;
-      
-      console.log('Using fallback redirect due to error');
       res.redirect(302, fallbackUrl);
       
     } catch (fallbackError) {
-      console.error('Even fallback failed:', fallbackError);
-      
       // Último recurso: formulario completamente vacío
       res.redirect(302, 'https://airtable.com/appxCc96K5ulNjpcL/pagVjxOWAS0rICA5j/form?prefill_Status=Contract%20Sent');
     }
