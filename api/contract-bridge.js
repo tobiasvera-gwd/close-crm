@@ -10,7 +10,7 @@ export default function handler(req, res) {
       country,
       domain
     } = req.query;
-
+    
     // Si no hay nombre del cliente, mostrar error
     if (!lead_name) {
       return res.status(400).setHeader('Content-Type', 'text/html').send(`
@@ -24,7 +24,7 @@ export default function handler(req, res) {
         </html>
       `);
     }
-
+    
     // Construir URL del formulario de Airtable con datos precargados
     const airtableFormUrl = 'https://airtable.com/appxCc96K5ulNjpcL/pagVjxOWAS0rICA5j/form';
     const params = new URLSearchParams();
@@ -32,14 +32,19 @@ export default function handler(req, res) {
     // Client Information
     params.append('prefill_Client Name', lead_name);
     params.append('prefill_Legal Company Name', lead_name);
-    if (address_1) params.append('prefill_Address', address_1);
-    if (city) params.append('prefill_City', city);
-    if (zipcode) params.append('prefill_ZIP Code', zipcode);
-    if (country) params.append('prefill_Country', country);
     if (domain) params.append('prefill_Client Domain', domain);
     
+    // Billing Address Information (matching form field names)
+    if (address_1) params.append('prefill_Billing Address Street', address_1);
+    if (city) params.append('prefill_Billing Address City', city);
+    if (zipcode) params.append('prefill_ZIP Code', zipcode);
+    if (country) params.append('prefill_Billing Address Country', country);
+    
+    // Company Information
+    params.append('prefill_Company Type', 'Unknown'); // Default value
+    
     // Status automático
-    params.append('prefill_Status', 'Contract Send');
+    params.append('prefill_Status', 'Contract Sent');
     params.append('prefill_Proposal Status', 'In Progress');
     
     // Complementary Data
@@ -49,7 +54,6 @@ export default function handler(req, res) {
     
     // Redirección directa
     res.redirect(302, finalUrl);
-
   } catch (error) {
     console.error('Error:', error);
     res.status(500).setHeader('Content-Type', 'text/html').send(`
