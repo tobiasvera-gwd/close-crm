@@ -1,4 +1,32 @@
 // api/contract-bridge.js
+
+// Function to clean domain from URL
+function cleanDomain(url) {
+  if (!url) return '';
+  
+  try {
+    // Remove protocol (http://, https://, ftp://, etc.)
+    let domain = url.replace(/^https?:\/\//, '').replace(/^ftp:\/\//, '').replace(/^\/\//, '');
+    
+    // Remove www. prefix
+    domain = domain.replace(/^www\./, '');
+    
+    // Remove trailing slash and any path
+    domain = domain.split('/')[0];
+    
+    // Remove port number if present
+    domain = domain.split(':')[0];
+    
+    // Remove any remaining whitespace
+    domain = domain.trim();
+    
+    return domain;
+  } catch (error) {
+    console.log('Error cleaning domain:', error);
+    return url; // Return original if cleaning fails
+  }
+}
+
 export default async function handler(req, res) {
   try {
     const { lead_name, lead_id } = req.query;
