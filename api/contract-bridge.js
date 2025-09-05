@@ -34,8 +34,8 @@ export default function handler(req, res) {
     params.append('prefill_Legal Company Name', lead_name);
     if (domain) params.append('prefill_Client Domain', domain);
     
-    // Billing Address Information (ALL with "Billing Address" prefix for consistency)
-    if (address_1) params.append('prefill_Billing Address Street', address_1);
+    // Billing Address Information (matching updated form field names)
+    if (address_1) params.append('prefill_Billing Address Street and Number', address_1);
     if (city) params.append('prefill_Billing Address City', city);
     if (zipcode) params.append('prefill_Billing Address ZIP Code', zipcode);
     if (country) params.append('prefill_Billing Address Country', country);
