@@ -122,7 +122,6 @@ export default async function handler(req, res) {
     fallbackParams.append('prefill_Status', 'Contract Sent');
     fallbackParams.append('prefill_Client Name', lead_name || 'Manual Entry Required');
     fallbackParams.append('prefill_Legal Company Name', lead_name || 'Manual Entry Required');
-    fallbackParams.append('prefill_Notes', `ERROR: ${error.message}`);
     if (lead_id) fallbackParams.append('prefill_Close Lead ID', lead_id);
     
     res.writeHead(302, { 
