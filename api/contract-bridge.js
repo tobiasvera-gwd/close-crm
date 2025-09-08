@@ -28,14 +28,32 @@ export default async function handler(req, res) {
         // Hardcoded API key para testing
         const CLOSE_API_KEY = 'api_05oaTCln3fAR3yzgbWKYeu.5VOdEOTNqRZWIj6WAOIsvB';
         
-        const response = await fetch(`https://api.close.com/api/v1/lead/${lead_id}/`, {
-          headers: {
-            'Authorization': `Basic ${Buffer.from(CLOSE_API_KEY + ':').toString('base64')}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        // Probar múltiples métodos de auth
+        let response;
+        let authMethod = '';
+        
+        // Método 1: Basic Auth con API key + ":"
+        try {
+          response = await fetch(`https://api.close.com/api/v1/lead/${lead_id}/`, {
+            headers: {
+              'Authorization': `Basic ${Buffer.from(CLOSE_API_KEY + ':').toString('base64')}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          authMethod = 'Basic';
+        } catch (e) {
+          // Método 2: Bearer token
+          response = await fetch(`https://api.close.com/api/v1/lead/${lead_id}/`, {
+            headers: {
+              'Authorization': `Bearer ${CLOSE_API_KEY}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          authMethod = 'Bearer';
+        }
         
         console.log('API Response status:', response.status);
+        debugInfo += ` | AUTH_METHOD: ${authMethod}`;
         
         if (response.ok) {
           const leadData = await response.json();
