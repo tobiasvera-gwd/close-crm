@@ -53,7 +53,6 @@ export default async function handler(req, res) {
         }
         
         console.log('API Response status:', response.status);
-        debugInfo += ` | AUTH_METHOD: ${authMethod}`;
         
         if (response.ok) {
           const leadData = await response.json();
