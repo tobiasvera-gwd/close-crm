@@ -21,13 +21,16 @@ export default async function handler(req, res) {
     let debugInfo = `Debug: lead_name=${lead_name}, lead_id=${lead_id}, api_key_exists=${!!process.env.CLOSE_API_KEY}`;
     
     // Si tenemos lead_id, hacer lookup
-    if (lead_id && lead_id.trim() !== '' && process.env.CLOSE_API_KEY) {
+    if (lead_id && lead_id.trim() !== '') {
       try {
         console.log('Making API call to CloseCRM...');
         
+        // Hardcoded API key para testing
+        const CLOSE_API_KEY = 'api_05oaTCln3fAR3yzgbWKYeu.5VOdEOTNqRZWIj6WAOIsvB';
+        
         const response = await fetch(`https://api.close.com/api/v1/lead/${lead_id}/`, {
           headers: {
-            'Authorization': `Bearer ${process.env.CLOSE_API_KEY}`,
+            'Authorization': `Basic ${Buffer.from(CLOSE_API_KEY + ':').toString('base64')}`,
             'Content-Type': 'application/json'
           }
         });
