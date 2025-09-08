@@ -1,41 +1,64 @@
 // api/contract-bridge.js
 export default function handler(req, res) {
+  async function getLeadData(leadId) {
+    try {
+      const response = await fetch(`https://api.close.com/api/v1/lead/${leadId}/`, {
+        headers: {
+          'Authorization': `Bearer ${process.env.CLOSE_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (error) {
+      console.error('Error fetching lead data:', error);
+    }
+    return null;
+  }
+  
   try {
-    const { lead_name, lead_id, domain, address, city, zipcode, country } = req.query;
+    const { lead_name, lead_id } = req.query;
     
     const params = new URLSearchParams();
     
-    // Client Name - siempre necesario, usar fallback si está vacío
+    // Client Name básico
     const clientName = lead_name && lead_name.trim() !== '' ? lead_name : 'Lead Name Required';
     params.append('prefill_Client Name', clientName);
     params.append('prefill_Legal Company Name', clientName);
     
-    // Domain - solo si tiene valor
-    if (domain && domain.trim() !== '') {
-      const cleanDomain = domain.replace(/^https?:\/\/(www\.)?/, '').split('/')[0];
-      params.append('prefill_Client Domain', cleanDomain);
-    }
-    
-    // Address fields - solo si tienen valores
-    if (address && address.trim() !== '') {
-      params.append('prefill_Billing Address Street and Number', address);
-    }
-    if (city && city.trim() !== '') {
-      params.append('prefill_Billing Address City', city);
-    }
-    if (zipcode && zipcode.trim() !== '') {
-      params.append('prefill_Billing Address ZIP Code', zipcode);
-    }
-    if (country && country.trim() !== '') {
-      params.append('prefill_Billing Address Country', country);
-    }
-    
-    // Lead ID - solo si existe
+    // Si tenemos lead_id, hacer lookup para obtener más datos
     if (lead_id && lead_id.trim() !== '') {
+      const leadData = await getLeadData(lead_id);
+      
+      if (leadData) {
+        // Domain
+        if (leadData.url) {
+          const cleanDomain = leadData.url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0];
+          params.append('prefill_Client Domain', cleanDomain);
+        }
+        
+        // Address data
+        if (leadData.addresses && leadData.addresses.length > 0) {
+          const address = leadData.addresses[0];
+          if (address.address_1) params.append('prefill_Billing Address Street and Number', address.address_1);
+          if (address.city) params.append('prefill_Billing Address City', address.city);
+          if (address.zipcode) params.append('prefill_Billing Address ZIP Code', address.zipcode);
+          if (address.country) params.append('prefill_Billing Address Country', address.country);
+        }
+        
+        // Update company name if we have better data
+        if (leadData.name && leadData.name.trim() !== '') {
+          params.set('prefill_Client Name', leadData.name);
+          params.set('prefill_Legal Company Name', leadData.name);
+        }
+      }
+      
       params.append('prefill_Close Lead ID', lead_id);
     }
     
-    // Defaults que siempre se establecen
+    // Defaults
     params.append('prefill_Status', 'Contract Sent');
     params.append('prefill_Company Type', 'Unknown');
     params.append('prefill_Service Type', 'Unknown');
@@ -46,13 +69,16 @@ export default function handler(req, res) {
     res.end();
     
   } catch (error) {
-    // Fallback robusto
+    console.error('Error in contract bridge:', error);
+    
+    // Fallback simple
     const fallbackParams = new URLSearchParams();
     fallbackParams.append('prefill_Status', 'Contract Sent');
-    fallbackParams.append('prefill_Client Name', 'Manual Entry Required');
-    fallbackParams.append('prefill_Legal Company Name', 'Manual Entry Required');
+    fallbackParams.append('prefill_Client Name', lead_name || 'Manual Entry Required');
+    fallbackParams.append('prefill_Legal Company Name', lead_name || 'Manual Entry Required');
     fallbackParams.append('prefill_Company Type', 'Unknown');
     fallbackParams.append('prefill_Service Type', 'Unknown');
+    if (lead_id) fallbackParams.append('prefill_Close Lead ID', lead_id);
     
     res.writeHead(302, { 
       Location: `https://airtable.com/appxCc96K5ulNjpcL/pagVjxOWAS0rICA5j/form?${fallbackParams.toString()}`
