@@ -1,23 +1,5 @@
 // api/contract-bridge.js
-export default function handler(req, res) {
-  async function getLeadData(leadId) {
-    try {
-      const response = await fetch(`https://api.close.com/api/v1/lead/${leadId}/`, {
-        headers: {
-          'Authorization': `Bearer ${process.env.CLOSE_API_KEY}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        return await response.json();
-      }
-    } catch (error) {
-      console.error('Error fetching lead data:', error);
-    }
-    return null;
-  }
-  
+export default async function handler(req, res) {
   try {
     const { lead_name, lead_id } = req.query;
     
@@ -29,30 +11,42 @@ export default function handler(req, res) {
     params.append('prefill_Legal Company Name', clientName);
     
     // Si tenemos lead_id, hacer lookup para obtener más datos
-    if (lead_id && lead_id.trim() !== '') {
-      const leadData = await getLeadData(lead_id);
-      
-      if (leadData) {
-        // Domain
-        if (leadData.url) {
-          const cleanDomain = leadData.url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0];
-          params.append('prefill_Client Domain', cleanDomain);
-        }
+    if (lead_id && lead_id.trim() !== '' && process.env.CLOSE_API_KEY) {
+      try {
+        const response = await fetch(`https://api.close.com/api/v1/lead/${lead_id}/`, {
+          headers: {
+            'Authorization': `Bearer ${process.env.CLOSE_API_KEY}`,
+            'Content-Type': 'application/json'
+          }
+        });
         
-        // Address data
-        if (leadData.addresses && leadData.addresses.length > 0) {
-          const address = leadData.addresses[0];
-          if (address.address_1) params.append('prefill_Billing Address Street and Number', address.address_1);
-          if (address.city) params.append('prefill_Billing Address City', address.city);
-          if (address.zipcode) params.append('prefill_Billing Address ZIP Code', address.zipcode);
-          if (address.country) params.append('prefill_Billing Address Country', address.country);
+        if (response.ok) {
+          const leadData = await response.json();
+          
+          // Domain
+          if (leadData.url) {
+            const cleanDomain = leadData.url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0];
+            params.append('prefill_Client Domain', cleanDomain);
+          }
+          
+          // Address data
+          if (leadData.addresses && leadData.addresses.length > 0) {
+            const address = leadData.addresses[0];
+            if (address.address_1) params.append('prefill_Billing Address Street and Number', address.address_1);
+            if (address.city) params.append('prefill_Billing Address City', address.city);
+            if (address.zipcode) params.append('prefill_Billing Address ZIP Code', address.zipcode);
+            if (address.country) params.append('prefill_Billing Address Country', address.country);
+          }
+          
+          // Update company name if we have better data
+          if (leadData.name && leadData.name.trim() !== '') {
+            params.set('prefill_Client Name', leadData.name);
+            params.set('prefill_Legal Company Name', leadData.name);
+          }
         }
-        
-        // Update company name if we have better data
-        if (leadData.name && leadData.name.trim() !== '') {
-          params.set('prefill_Client Name', leadData.name);
-          params.set('prefill_Legal Company Name', leadData.name);
-        }
+      } catch (fetchError) {
+        // Si falla el lookup, continuar sin datos adicionales
+        console.error('Lookup failed:', fetchError);
       }
       
       params.append('prefill_Close Lead ID', lead_id);
@@ -71,7 +65,8 @@ export default function handler(req, res) {
   } catch (error) {
     console.error('Error in contract bridge:', error);
     
-    // Fallback simple
+    // Fallback simple y seguro
+    const { lead_name, lead_id } = req.query;
     const fallbackParams = new URLSearchParams();
     fallbackParams.append('prefill_Status', 'Contract Sent');
     fallbackParams.append('prefill_Client Name', lead_name || 'Manual Entry Required');
